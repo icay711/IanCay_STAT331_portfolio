@@ -1,6 +1,6 @@
 ---
 title: "STAT 331 Portfolio"
-author: "Your Name Goes Here"
+author: "Ian Cay"
 format: 
   html: 
     self-contained: true
@@ -11,7 +11,7 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an __.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be a C.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -23,28 +23,62 @@ execute:
 
 ```{r}
 #| label: wd-1-csv
-
+# Lab 3 Question 2
+library(here)
+teacher_evals <- read_csv(here::here("data", "teacher_evals.csv"))
 ```
 
 -   `xlsx`
 
 ```{r}
 #| label: wd-1-xlsx
-
+# Check-in 2.3 Question 5
+agesxl <- read_xlsx(path = here::here("check-ins", 
+                                      "2.1-loading-data", 
+                                      "Ages_Data", 
+                                      "ages.xlsx"
+                                      ), 
+                    sheet = "ages"
+                    )
 ```
 
 -   `txt`
 
 ```{r}
 #| label: wd-1-txt
-
+# Check-in 2.3 Question 3
+ages_tab <- read_table(file = here::here("Week 2", 
+                                          "Check-ins", 
+                                         "Ages_Data", 
+                                         "ages_tab.txt"
+                                         ))
 ```
 
 **WD-2: I can select necessary columns from a dataset.**
 
 ```{r}
 #| label: wd-2
-
+# Lab 3 Question 5
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants >= 10) |>
+  mutate(across(c(course_id,
+                  question_no,
+                  academic_degree, 
+                  seniority, 
+                  sex), 
+                as.factor)) |>
+  select(course_id, 
+         teacher_id, 
+         question_no, 
+         no_participants, 
+         resp_share, 
+         SET_score_avg, 
+         percent_failed_cur, 
+         academic_degree, 
+         seniority, 
+         sex
+         )
 ```
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -53,14 +87,58 @@ execute:
 
 ```{r}
 #| label: wd-3-numeric
-
+# Lab 3 Question 5
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants >= 10) |>
+  mutate(across(c(course_id,
+                  question_no,
+                  academic_degree, 
+                  seniority, 
+                  sex), 
+                as.factor)) |>
+  select(course_id, 
+         teacher_id, 
+         question_no, 
+         no_participants, 
+         resp_share, 
+         SET_score_avg, 
+         percent_failed_cur, 
+         academic_degree, 
+         seniority, 
+         sex
+         )
 ```
 
 -   character -- specifically a string (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-3-string
+# Lab 5 (Finding the Suspects)
+suspects <- get_fit_now_member |>
+  filter(str_starts(id, 
+                    "48Z"), 
+         str_detect(membership_status, 
+                    "gold")) |>
+  inner_join(
+    get_fit_now_check_in |>
+      filter(str_starts(membership_id, 
+                        "48Z"), 
+             ymd(check_in_date) == ymd(20180109)),
+    by = c("id" = "membership_id"))
 
+suspects <- suspects |>
+  inner_join(person,
+             by = c("person_id" = "id"))
+
+suspects_drivers_license <- drivers_license |>
+  filter(str_detect(plate_number,
+                    "H42W"))
+
+suspects <- suspects |>
+  inner_join(suspects_drivers_license,
+            by = c("license_id" = "id"))
+suspects
 ```
 
 -   factor
@@ -90,7 +168,31 @@ execute:
 
 ```{r}
 #| label: wd-4-string
+# Lab 5 (Finding the Suspects)
+suspects <- get_fit_now_member |>
+  filter(str_starts(id, 
+                    "48Z"), 
+         str_detect(membership_status, 
+                    "gold")) |>
+  inner_join(
+    get_fit_now_check_in |>
+      filter(str_starts(membership_id, 
+                        "48Z"), 
+             ymd(check_in_date) == ymd(20180109)),
+    by = c("id" = "membership_id"))
 
+suspects <- suspects |>
+  inner_join(person,
+             by = c("person_id" = "id"))
+
+suspects_drivers_license <- drivers_license |>
+  filter(str_detect(plate_number,
+                    "H42W"))
+
+suspects <- suspects |>
+  inner_join(suspects_drivers_license,
+            by = c("license_id" = "id"))
+suspects
 ```
 
 -   factor (example must use functions from **forcats**)
@@ -113,7 +215,31 @@ execute:
 
 ```{r}
 #| label: wd-5-left
+# Lab 5 (Finding the Final Suspect)
+final_suspects <- drivers_license |>
+  filter(height %in% c(65, 66, 67), 
+         gender == "female", 
+         hair_color == "red", 
+         car_make == "Tesla", 
+         car_model == "Model S")
 
+final_suspects <- final_suspects |>
+  left_join(person, 
+             by = c("id" = "license_id")) |>
+  rename(person_id  = id.y)
+final_suspects
+
+facebook_event_checkin |>
+  filter(person_id %in% final_suspects$person_id, 
+         str_detect(event_name, 
+                    "SQL Symphony Concert"), 
+         str_starts(date, 
+                    "201712")) |>
+  pull(person_id)
+
+final_suspects |>
+  filter(str_detect(person_id, "99716")) |>
+  pull(name)
 ```
 
 -   `right_join()`
@@ -127,7 +253,31 @@ execute:
 
 ```{r}
 #| label: wd-5-inner
+# Lab 5 (Finding the Suspects)
+suspects <- get_fit_now_member |>
+  filter(str_starts(id, 
+                    "48Z"), 
+         str_detect(membership_status, 
+                    "gold")) |>
+  inner_join(
+    get_fit_now_check_in |>
+      filter(str_starts(membership_id, 
+                        "48Z"), 
+             ymd(check_in_date) == ymd(20180109)),
+    by = c("id" = "membership_id"))
 
+suspects <- suspects |>
+  inner_join(person,
+             by = c("person_id" = "id"))
+
+suspects_drivers_license <- drivers_license |>
+  filter(str_detect(plate_number,
+                    "H42W"))
+
+suspects <- suspects |>
+  inner_join(suspects_drivers_license,
+            by = c("license_id" = "id"))
+suspects
 ```
 
 -   `full_join()`
@@ -159,14 +309,57 @@ execute:
 
 ```{r}
 #| label: wd-7-long
+# Lab 4 Problem 6
+ca_childcare_long <- ca_childcare |>
+  pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "age_group",
+    values_to = "median_price"
+  )
 
+ca_childcare_long <- ca_childcare_long |>
+  mutate(age_group = fct_relevel(age_group, 
+                                 "mc_infant", 
+                                 "mc_toddler", 
+                                 "mc_preschool"))
+
+ggplot(ca_childcare_long, aes(x = study_year, y = median_price, color = region)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~ age_group, 
+             labeller = as_labeller(c(
+               "mc_infant" = "Infant",
+               "mc_toddler" = "Toddler",
+               "mc_preschool" = "Preschool"
+             ))
+  ) +
+  theme_bw() +
+  theme(legend.position = "right") +
+  labs(
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    x = "Study Year",
+    y = "",
+    color = "California Region"
+  )
 ```
 
 -   `pivot_wider()`
 
 ```{r}
 #| label: wd-7-wide
+# Lab 4 Problem 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 ## Reproducibility
@@ -175,20 +368,59 @@ execute:
 
 I've done this in the following provided assignments:
 
+-   `Lab 2`
+-   `Lab 3`
+
 **R-2: I can write well documented and tidy code.**
 
 -   Example of **ggplot2** plotting
 
 ```{r}
 #| label: r-2-1
-
+# Lab 4 Question 7
+ggplot(ca_childcare, 
+       aes(x = mhi_2018, 
+           y = mc_infant
+           )
+       ) +
+  geom_point(alpha = 0.6, # Scatterplot points
+             color = "steelblue"
+             ) + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "darkred", 
+              linetype = "dashed"
+              ) + 
+  theme_bw() +
+  labs(
+    title = "Household Income vs. Infant Care Prices",
+    x = "Median Household Income (dollars)",
+    y = "",
+    subtitle = "Median Weekly Price for Infant Care (dollars)"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0, 
+                              face = "bold") 
+  )
 ```
 
 -   Example of **dplyr** pipeline
 
 ```{r}
 #| label: r-2-2
+# Lab 4 Problem 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 -   Example of function formatting
@@ -222,14 +454,53 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: dvs-1-num
-
+# Lab 4 Question 7
+ggplot(ca_childcare, 
+       aes(x = mhi_2018, 
+           y = mc_infant
+           )
+       ) +
+  geom_point(alpha = 0.6, # Scatterplot points
+             color = "steelblue"
+             ) + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "darkred", 
+              linetype = "dashed"
+              ) + 
+  theme_bw() +
+  labs(
+    title = "Household Income vs. Infant Care Prices",
+    x = "Median Household Income (dollars)",
+    y = "",
+    subtitle = "Median Weekly Price for Infant Care (dollars)"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0, 
+                              face = "bold") 
+  )
 ```
 
 -   at least one numeric variable and one categorical variable
 
 ```{r}
 #| label: dvs-2-num-cat
-
+# Lab 2 Question 16
+library(ggridges)
+  ggplot(data = surveys,
+       mapping = aes(
+         x = weight, 
+         y = species,
+         )
+       ) +
+  geom_density_ridges(alpha = 0.3) + 
+  geom_jitter(alpha = 0.6, width = 0.2, color = "steelblue")  +
+  labs(
+    title = "Rodent Weight (g) By Species", 
+    x = "Weight (g)",
+    y = ""
+    ) +
+  theme(axis.text.y = element_text(hjust = 1))
 ```
 
 -   at least two categorical variables
@@ -252,14 +523,53 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: dvs-2-1
-
+# Lab 4 Question 7
+ggplot(ca_childcare, 
+       aes(x = mhi_2018, 
+           y = mc_infant
+           )
+       ) +
+  geom_point(alpha = 0.6, # Scatterplot points
+             color = "steelblue"
+             ) + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "darkred", 
+              linetype = "dashed"
+              ) + 
+  theme_bw() +
+  labs(
+    title = "Household Income vs. Infant Care Prices",
+    x = "Median Household Income (dollars)",
+    y = "",
+    subtitle = "Median Weekly Price for Infant Care (dollars)"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0, 
+                              face = "bold") 
+  )
 ```
 
 -   I can modify the text in my plot to be more readable
 
 ```{r}
 #| label: dvs-2-2
-
+# Lab 2 Question 16
+library(ggridges)
+  ggplot(data = surveys,
+       mapping = aes(
+         x = weight, 
+         y = species,
+         )
+       ) +
+  geom_density_ridges(alpha = 0.3) + 
+  geom_jitter(alpha = 0.6, width = 0.2, color = "steelblue")  +
+  labs(
+    title = "Rodent Weight (g) By Species", 
+    x = "Weight (g)",
+    y = ""
+    ) +
+  theme(axis.text.y = element_text(hjust = 1))
 ```
 
 -   I can reorder my legend to align with the colors in my plot
@@ -275,14 +585,62 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: dvs-3-1
-
+# Lab 4 Question 7
+ggplot(ca_childcare, 
+       aes(x = mhi_2018, 
+           y = mc_infant
+           )
+       ) +
+  geom_point(alpha = 0.6, # Scatterplot points
+             color = "steelblue"
+             ) + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "darkred", 
+              linetype = "dashed"
+              ) + 
+  theme_bw() +
+  labs(
+    title = "Household Income vs. Infant Care Prices",
+    x = "Median Household Income (dollars)",
+    y = "",
+    subtitle = "Median Weekly Price for Infant Care (dollars)"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0, 
+                              face = "bold") 
+  )
 ```
 
 -   I can use annotations
 
 ```{r}
 #| label: dvs-3-2
-
+# Lab 4 Question 7
+ggplot(ca_childcare, 
+       aes(x = mhi_2018, 
+           y = mc_infant
+           )
+       ) +
+  geom_point(alpha = 0.6, # Scatterplot points
+             color = "steelblue"
+             ) + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "darkred", 
+              linetype = "dashed"
+              ) + 
+  theme_bw() +
+  labs(
+    title = "Household Income vs. Infant Care Prices",
+    x = "Median Household Income (dollars)",
+    y = "",
+    subtitle = "Median Weekly Price for Infant Care (dollars)"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0, 
+                              face = "bold") 
+  )
 ```
 
 -   I can be creative...
@@ -298,14 +656,46 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: dvs-4-summarize
+# Lab 4 Question 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 -   Example using `across()`
 
 ```{r}
 #| label: dvs-4-across
-
+# Lab 3 Question 5
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants >= 10) |>
+  mutate(across(c(course_id,
+                  question_no,
+                  academic_degree, 
+                  seniority, 
+                  sex), 
+                as.factor)) |>
+  select(course_id, 
+         teacher_id, 
+         question_no, 
+         no_participants, 
+         resp_share, 
+         SET_score_avg, 
+         percent_failed_cur, 
+         academic_degree, 
+         seniority, 
+         sex
+         )
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
@@ -371,7 +761,27 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: pe-1-across
-
+# Lab 3 Question 5
+teacher_evals_clean <- teacher_evals |>
+  rename(sex = gender) |>
+  filter(no_participants >= 10) |>
+  mutate(across(c(course_id,
+                  question_no,
+                  academic_degree, 
+                  seniority, 
+                  sex), 
+                as.factor)) |>
+  select(course_id, 
+         teacher_id, 
+         question_no, 
+         no_participants, 
+         resp_share, 
+         SET_score_avg, 
+         percent_failed_cur, 
+         academic_degree, 
+         seniority, 
+         sex
+         )
 ```
 
 -   `map()` functions
@@ -397,7 +807,7 @@ I've done this in the following provided assignments:
 
 ```
 
-**PE-3:I can use iteration to reduce repetition in my code.**
+**PE-3: I can use iteration to reduce repetition in my code.**
 
 -   `across()`
 
@@ -460,28 +870,36 @@ I've done this in the following provided assignments:
 
 ```{r}
 #| label: dsm-2-1
-
+# Lab 1 Question 11
+t.test(len ~ supp, data = ToothGrowth, 
+       alternative = c("two.sided"), 
+       var.equal = FALSE, 
+       conf.level = 0.95)
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dsm-2-2
+# Lab 2 Question 17
+species_mod <- aov(weight ~ species, 
+                   data = surveys)
 
+summary(species_mod)
 ```
 
 ## Revising My Thinking
 
-<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
+<!-- I have revised my thinking throughout the course by consistently learning new functions that I was unaware of before revising my work through examples of other students' work. Afterwards, I was able to use those fuctions to revise my own code making it tidier, more efficient, and more robust. -->
 
 <!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
 
 ## Extending My Thinking
 
-<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
+<!-- I have completed most of the challenges  -->
 
 ## Peer Support & Collaboration
 
-<!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
+![](images/Screenshot%202024-11-03%20at%2011.46.46%E2%80%AFPM.png){width="195"}
 
-<!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+<!-- At first, I was somewhat struggling with collaborating with my partners and staying within my role, but as I progressively got better as I got a better understanding of how to collaborate with my partner.   -->
