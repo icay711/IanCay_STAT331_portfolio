@@ -11,7 +11,7 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be a C.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be a D+.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -115,29 +115,24 @@ teacher_evals_clean <- teacher_evals |>
 ```{r}
 #| label: wd-3-string
 # Lab 5 (Finding the Suspects)
+  # Revised to be a single pipeline
 suspects <- get_fit_now_member |>
-  filter(str_starts(id, 
-                    "48Z"), 
-         str_detect(membership_status, 
-                    "gold")) |>
+  filter(str_starts(id, "48Z"), 
+         str_detect(membership_status, "gold")) |>
   inner_join(
     get_fit_now_check_in |>
-      filter(str_starts(membership_id, 
-                        "48Z"), 
+      filter(str_starts(membership_id, "48Z"), 
              ymd(check_in_date) == ymd(20180109)),
-    by = c("id" = "membership_id"))
+    by = c("id" = "membership_id")
+  ) |>
+  inner_join(person, 
+             by = c("person_id" = "id")) |>
+  inner_join(
+    drivers_license |>
+      filter(str_detect(plate_number, "H42W")),
+    by = c("license_id" = "id")
+  )
 
-suspects <- suspects |>
-  inner_join(person,
-             by = c("person_id" = "id"))
-
-suspects_drivers_license <- drivers_license |>
-  filter(str_detect(plate_number,
-                    "H42W"))
-
-suspects <- suspects |>
-  inner_join(suspects_drivers_license,
-            by = c("license_id" = "id"))
 suspects
 ```
 
@@ -145,14 +140,38 @@ suspects
 
 ```{r}
 #| label: wd-3-factor
+# Lab 5 (Finding the Suspects)
+  # Revised to be a single pipeline
+suspects <- get_fit_now_member |>
+  filter(str_starts(id, "48Z"), 
+         str_detect(membership_status, "gold")) |>
+  inner_join(
+    get_fit_now_check_in |>
+      filter(str_starts(membership_id, "48Z"), 
+             ymd(check_in_date) == ymd(20180109)),
+    by = c("id" = "membership_id")
+  ) |>
+  inner_join(person, 
+             by = c("person_id" = "id")) |>
+  inner_join(
+    drivers_license |>
+      filter(str_detect(plate_number, "H42W")),
+    by = c("license_id" = "id")
+  )
 
+suspects
 ```
 
 -   date (example must use functions from **lubridate**)
 
 ```{r}
 #| label: wd-3-date
-
+# Lab 5 (Accessing Crime Scene Description)
+crime_scene_report |>
+  filter(ymd(date) == ymd(20180115), 
+         type == "murder", 
+         city == "SQL City") |>
+  pull(description)
 ```
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -161,7 +180,22 @@ suspects
 
 ```{r}
 #| label: wd-4-numeric
+# Challenge 3
+library(tidyverse)
+library(here)
+teacher_evals <- read_csv(here::here("data", "teacher_evals.csv"))
 
+teacher_evals_compare <- teacher_evals |>
+  filter(question_no == 903) |>
+  mutate(
+    SET_level = if_else(SET_score_avg >= 4, 
+                        "excellent", 
+                        "standard"),
+    sen_level = if_else(seniority <= 4, 
+                        "junior", 
+                        "senior")
+    ) |> 
+  select(course_id, SET_level, sen_level)
 ```
 
 -   character -- specifically a string (example must use functions from **stringr**)
@@ -169,29 +203,23 @@ suspects
 ```{r}
 #| label: wd-4-string
 # Lab 5 (Finding the Suspects)
+  # Revised to be a single pipeline
 suspects <- get_fit_now_member |>
-  filter(str_starts(id, 
-                    "48Z"), 
-         str_detect(membership_status, 
-                    "gold")) |>
+  filter(str_starts(id, "48Z"), 
+         str_detect(membership_status, "gold")) |>
   inner_join(
     get_fit_now_check_in |>
-      filter(str_starts(membership_id, 
-                        "48Z"), 
+      filter(str_starts(membership_id, "48Z"), 
              ymd(check_in_date) == ymd(20180109)),
-    by = c("id" = "membership_id"))
-
-suspects <- suspects |>
-  inner_join(person,
-             by = c("person_id" = "id"))
-
-suspects_drivers_license <- drivers_license |>
-  filter(str_detect(plate_number,
-                    "H42W"))
-
-suspects <- suspects |>
-  inner_join(suspects_drivers_license,
-            by = c("license_id" = "id"))
+    by = c("id" = "membership_id")
+  ) |>
+  inner_join(person, 
+             by = c("person_id" = "id")) |>
+  inner_join(
+    drivers_license |>
+      filter(str_detect(plate_number, "H42W")),
+    by = c("license_id" = "id")
+  )
 suspects
 ```
 
@@ -199,14 +227,42 @@ suspects
 
 ```{r}
 #| label: wd-4-factor
+# Lab 4 Question 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 -   date (example must use functions from **lubridate**)
 
 ```{r}
 #| label: wd-4-date
-
+suspects <- get_fit_now_member |>
+  filter(str_starts(id, "48Z"), 
+         str_detect(membership_status, "gold")) |>
+  inner_join(
+    get_fit_now_check_in |>
+      filter(str_starts(membership_id, "48Z"), 
+             ymd(check_in_date) == ymd(20180109)),
+    by = c("id" = "membership_id")
+  ) |>
+  inner_join(person, 
+             by = c("person_id" = "id")) |>
+  inner_join(
+    drivers_license |>
+      filter(str_detect(plate_number, "H42W")),
+    by = c("license_id" = "id")
+  )
+suspects
 ```
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
@@ -427,7 +483,22 @@ income_table |>
 
 ```{r}
 #| label: r-2-3
-
+# Lab 7 Question 4
+rescale_01 <- function(x) {
+  # Check if input is numeric
+  if (!is.numeric(x)) {
+    stop("Input must be a numeric vector.")
+  }
+  
+  # Check if the length of the vector is greater than 1
+  if (length(x) <= 1) {
+    stop("Input vector must have more than one element.")
+  }
+  
+  # Calculate range and apply scaling
+  r <- range(x, na.rm = TRUE)
+  (x - r[1]) / (r[2] - r[1])
+}
 ```
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
@@ -507,14 +578,61 @@ library(ggridges)
 
 ```{r}
 #| label: dvs-2-cat
-
+# Challenge 3 Question 2
+ggplot(data = teacher_evals_compare, 
+       aes(x = sen_level, 
+           fill = SET_level)) +
+  geom_bar(stat = "count", 
+           position = "stack") +
+  scale_fill_manual(
+    values = c("excellent" = "steelblue", 
+               "standard" = "orange3"),
+    name = "SET Level"
+  ) +
+  labs(
+    x = "Seniority of Instructor",
+    y = "",
+    subtitle = "Number of Sections"
+  ) +
+  theme_bw()
 ```
 
 -   dates (timeseries plot)
 
 ```{r}
 #| label: dvs-2-date
+# Lab 4 Question 6
+ca_childcare_long <- ca_childcare |>
+  pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "age_group",
+    values_to = "median_price"
+  )
 
+ca_childcare_long <- ca_childcare_long |>
+  mutate(age_group = fct_relevel(age_group, 
+                                 "mc_infant", 
+                                 "mc_toddler", 
+                                 "mc_preschool"))
+
+ggplot(ca_childcare_long, aes(x = study_year, y = median_price, color = region)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~ age_group, 
+             labeller = as_labeller(c(
+               "mc_infant" = "Infant",
+               "mc_toddler" = "Toddler",
+               "mc_preschool" = "Preschool"
+             ))
+  ) +
+  theme_bw() +
+  theme(legend.position = "right") +
+  labs(
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    x = "Study Year",
+    y = "",
+    color = "California Region"
+  )
 ```
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
@@ -576,7 +694,38 @@ library(ggridges)
 
 ```{r}
 #| label: dvs-2-3
+# Lab 4 Question 6
+ca_childcare_long <- ca_childcare |>
+  pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "age_group",
+    values_to = "median_price"
+  )
 
+ca_childcare_long <- ca_childcare_long |>
+  mutate(age_group = fct_relevel(age_group, 
+                                 "mc_infant", 
+                                 "mc_toddler", 
+                                 "mc_preschool"))
+
+ggplot(ca_childcare_long, aes(x = study_year, y = median_price, color = region)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~ age_group, 
+             labeller = as_labeller(c(
+               "mc_infant" = "Infant",
+               "mc_toddler" = "Toddler",
+               "mc_preschool" = "Preschool"
+             ))
+  ) +
+  theme_bw() +
+  theme(legend.position = "right") +
+  labs(
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    x = "Study Year",
+    y = "",
+    color = "California Region"
+  )
 ```
 
 **DVS-3: I show creativity in my visualizations**
@@ -675,27 +824,20 @@ income_table |>
 
 ```{r}
 #| label: dvs-4-across
-# Lab 3 Question 5
-teacher_evals_clean <- teacher_evals |>
-  rename(sex = gender) |>
-  filter(no_participants >= 10) |>
-  mutate(across(c(course_id,
-                  question_no,
-                  academic_degree, 
-                  seniority, 
-                  sex), 
-                as.factor)) |>
-  select(course_id, 
-         teacher_id, 
-         question_no, 
-         no_participants, 
-         resp_share, 
-         SET_score_avg, 
-         percent_failed_cur, 
-         academic_degree, 
-         seniority, 
-         sex
-         )
+# Lab 7 Question 1
+missing_summary <- fish %>%
+  summarise(
+    across(everything(), 
+           ~ sum(is.na(.)), 
+           .names = "{.col}")
+  ) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "variable", 
+               values_to = "missing_count") %>%
+  filter(missing_count > 0) %>%
+  mutate(observations_with_missing = sum(missing_count))
+
+missing_summary
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
@@ -704,14 +846,41 @@ teacher_evals_clean <- teacher_evals |>
 
 ```{r}
 #| label: dvs-5-1
+# Lab 4 Problem 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dvs-5-2
-
+# Lab 8 Question 3
+evals |> 
+  mutate(
+    sen_level = if_else(seniority <= 4, "junior", "senior")) |> 
+  select(teacher_id, sex, sen_level, academic_degree) |> 
+  distinct(teacher_id, .keep_all = TRUE) |> 
+  pivot_longer(cols = c(sex, sen_level, academic_degree), 
+               names_to = "category", 
+               values_to = "value") |> 
+  group_by(value) |> 
+  summarize(count = n()) |>  # Count each category
+  pivot_wider(names_from = value, 
+              values_from = count) |> 
+  kable(format = "html") |> 
+  kable_styling(bootstrap_options = "striped", 
+                position = "right")
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
@@ -720,14 +889,41 @@ teacher_evals_clean <- teacher_evals |>
 
 ```{r}
 #| label: dvs-6-1
+# Lab 4 Problem 4
+income_summary <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarise(median_income = median(mhi_2018, na.rm = TRUE), .groups = 'drop')
 
+income_table <- income_summary |>
+  pivot_wider(names_from = study_year, values_from = median_income, 
+              names_prefix = "Year_") |>
+  arrange(desc(Year_2018))
+
+income_table |> 
+  head(10)
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dvs-6-2
-
+# Lab 8 Question 3
+evals |> 
+  mutate(
+    sen_level = if_else(seniority <= 4, "junior", "senior")) |> 
+  select(teacher_id, sex, sen_level, academic_degree) |> 
+  distinct(teacher_id, .keep_all = TRUE) |> 
+  pivot_longer(cols = c(sex, sen_level, academic_degree), 
+               names_to = "category", 
+               values_to = "value") |> 
+  group_by(value) |> 
+  summarize(count = n()) |>  # Count each category
+  pivot_wider(names_from = value, 
+              values_from = count) |> 
+  kable(format = "html") |> 
+  kable_styling(bootstrap_options = "striped", 
+                position = "right")
 ```
 
 **DVS-7: I show creativity in my tables.**
@@ -761,27 +957,20 @@ teacher_evals_clean <- teacher_evals |>
 
 ```{r}
 #| label: pe-1-across
-# Lab 3 Question 5
-teacher_evals_clean <- teacher_evals |>
-  rename(sex = gender) |>
-  filter(no_participants >= 10) |>
-  mutate(across(c(course_id,
-                  question_no,
-                  academic_degree, 
-                  seniority, 
-                  sex), 
-                as.factor)) |>
-  select(course_id, 
-         teacher_id, 
-         question_no, 
-         no_participants, 
-         resp_share, 
-         SET_score_avg, 
-         percent_failed_cur, 
-         academic_degree, 
-         seniority, 
-         sex
-         )
+# Lab 7 Question 1
+missing_summary <- fish %>%
+  summarise(
+    across(everything(), 
+           ~ sum(is.na(.)), 
+           .names = "{.col}")
+  ) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "variable", 
+               values_to = "missing_count") %>%
+  filter(missing_count > 0) %>%
+  mutate(observations_with_missing = sum(missing_count))
+
+missing_summary
 ```
 
 -   `map()` functions
@@ -827,7 +1016,14 @@ teacher_evals_clean <- teacher_evals |>
 
 ```{r}
 #| label: pe-3-map-2
+# Lab 9 Question 6
+all_simulations <- grid |> 
+  mutate(simulated_means = pmap(.l = list(n = n, df = df), 
+                                .f = simulate_means)
+         ) |> 
+  unnest(simulated_means) 
 
+all_simulations
 ```
 
 **PE-4: I can use modern tools when carrying out my analysis.**
@@ -890,13 +1086,13 @@ summary(species_mod)
 
 ## Revising My Thinking
 
-<!-- I have revised my thinking throughout the course by consistently learning new functions that I was unaware of before revising my work through examples of other students' work. Afterwards, I was able to use those fuctions to revise my own code making it tidier, more efficient, and more robust. -->
+I have revised my thinking throughout the course by consistently learning new functions that I was unaware of before revising my work through examples of other students' work. Afterwards, I was able to use those fuctions to revise my own code making it tidier, more efficient, and more robust.
 
-<!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
+For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions.
 
 ## Extending My Thinking
 
-<!-- I have completed most of the challenges  -->
+I have completed most of the challenges as well as most of the optional work in Lab 9. Also, I have completed most of my revisions.
 
 ## Peer Support & Collaboration
 

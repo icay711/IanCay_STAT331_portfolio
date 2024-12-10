@@ -6,16 +6,21 @@ editor: visual
 
 **Answer each of the following questions with *one sentence* including a brief explanation.**
 
-1. Finish the sentence with another student’s name: "If [Name of Student] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
+1.  Finish the sentence with another student's name: "If \[Name of Student\] doesn't earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
+2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
-2. What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+3.  What was the easiest part of the class for you? Explain why.
 
+4.  What part of the class surprised or interested you the most? Explain why.
 
-3. What was the easiest part of the class for you? Explain why.
+5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
 
-
-4. What part of the class surprised or interested you the most? Explain why.
-
-
-5. Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+```{=html}
+<!-- -->
+```
+1.  If Eva doesn't earn an A, then nobody should, because Eva has been answering a lot of questions on Discord, showing that she has a good understanding of how to code in R.
+2.  The most difficult part of the class for me was Lab 7 Question 2 because it required me to use a lot of code that I wasn't familiar with using.
+3.  The easiest part of the class for me were the check-ins and practice activities in which we were given skeleton code because it allows me to get a general idea of what code I should use.
+4.  I think that the investigative labs/practice activities interested me the most because it piqued my curiosity, giving me another reason to complete the coding assignment.
+5.  One piece of advice I would give to a student just starting a quarter of STAT 331 would be to have a clear understanding of the purpose of taking this class, since it is much easier to learn about something once you have a reason to care about it.

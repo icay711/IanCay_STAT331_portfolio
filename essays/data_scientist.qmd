@@ -9,3 +9,5 @@ editor: visual
 -   Focus specifically on data science concepts and the skills we employed in learning them, not a laundry list of topics that you learned (those are in the syllabus, so I know them already).
 
 -   Focus on a small number of specific areas of growth for you that happened in STAT 331. Identify at least one artifact in your portfolio that illustrates each area of growth and explain how this artifact shows growth in the way you are describing.
+
+Through this course, we learned about how to think create and modify tables, and visualization using R. Also, we learned how to modify data sets, and how to use creative and critical thinking to solve complex coding problems. One area of growth for me would be working with others, because initially, for the practice activities, I wouldn't know how to solve most of the problems, so my partner would just solve them for me. Also, I have goten better at writing more efficient code, as shown by my code for Lab 5 (Finding the Suspects), in which I condensed multiple pipelines into one pipeline.
